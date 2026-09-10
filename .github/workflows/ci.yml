@@ -1,68 +1,65 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch: 
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-26.04
+  # build-linux:
+  #   runs-on: ubuntu-26.04
 
-    steps:
-      - uses: actions/checkout@v7
+  #   steps:
+  #     - uses: actions/checkout@v7
 
-      - name: Install unit tests requirements
-        run: |
-          pipx install uv
-          uv sync
+  #     - name: Install unit tests requirements
+  #       run: |
+  #         pipx install uv
+  #         uv sync
 
-      - name: Build
-        run: |
-          . .venv/bin/activate
+  #     - name: Build
+  #       run: |
+  #         . .venv/bin/activate
 
-          cmake --preset default
+  #         cmake --preset default
 
-          cmake --build build --parallel
+  #         cmake --build build --parallel
 
-      - name: Test
-        working-directory: build
-        run: |
-          ctest --output-on-failure
+  #     - name: Test
+  #       working-directory: build
+  #       run: |
+  #         ctest --output-on-failure
 
-      - name: Parse C++ source files (WASI toolchain)
-        run: |
-          for i in src/parser/cxx/*.cc src/lsp/cxx/lsp/*.cc src/frontend/cxx/*.cc; do
-            echo "Parsing $i"
-            ./build/src/frontend/cxx \
-              -I src/parser \
-              -I src/lsp \
-              -I build/_deps/utfcpp-src/source \
-              -I build/_deps/simdjson-src \
-              -I build/src/parser \
-              -DCXX_NO_FLATBUFFERS \
-              -DCXX_NO_FILESYSTEM \
-              -DCXX_NO_THREADS \
-              -D_WASI_EMULATED_MMAN \
-              $i
-          done
+      # - name: Parse C++ source files (WASI toolchain)
+      #   run: |
+      #     for i in src/parser/cxx/*.cc src/lsp/cxx/lsp/*.cc src/frontend/cxx/*.cc; do
+      #       echo "Parsing $i"
+      #       ./build/src/frontend/cxx \
+      #         -I src/parser \
+      #         -I src/lsp \
+      #         -I build/_deps/utfcpp-src/source \
+      #         -I build/_deps/simdjson-src \
+      #         -I build/src/parser \
+      #         -DCXX_NO_FLATBUFFERS \
+      #         -DCXX_NO_FILESYSTEM \
+      #         -DCXX_NO_THREADS \
+      #         -D_WASI_EMULATED_MMAN \
+      #         $i
+      #     done
 
-      - name: Parse C++ source files (Linux toolchain)
-        if: false
-        run: |
-          for i in src/parser/cxx/*.cc src/lsp/cxx/lsp/*.cc src/frontend/cxx/*.cc; do
-            echo "Parsing $i"
-            ./build/src/frontend/cxx \
-              -toolchain linux \
-              -I src/parser \
-              -I src/lsp \
-              -I build/_deps/utfcpp-src/source \
-              -I build/_deps/simdjson-src \
-              -I build/src/parser \
-              -DCXX_NO_FLATBUFFERS \
-              $i
-          done
+      # - name: Parse C++ source files (Linux toolchain)
+      #   if: false
+      #   run: |
+      #     for i in src/parser/cxx/*.cc src/lsp/cxx/lsp/*.cc src/frontend/cxx/*.cc; do
+      #       echo "Parsing $i"
+      #       ./build/src/frontend/cxx \
+      #         -toolchain linux \
+      #         -I src/parser \
+      #         -I src/lsp \
+      #         -I build/_deps/utfcpp-src/source \
+      #         -I build/_deps/simdjson-src \
+      #         -I build/src/parser \
+      #         -DCXX_NO_FLATBUFFERS \
+      #         $i
+      #     done
 
   build-linux-mlir:
     runs-on: ubuntu-26.04
@@ -94,245 +91,245 @@ jobs:
         run: |
           ctest --output-on-failure
 
-  build-windows:
-    runs-on: windows-latest
+  # build-windows:
+  #   runs-on: windows-latest
 
-    steps:
-      - uses: actions/checkout@v7
+  #   steps:
+  #     - uses: actions/checkout@v7
 
-      - name: Install unit tests requirements
-        run: |
-          pipx install uv
-          uv sync
+  #     - name: Install unit tests requirements
+  #       run: |
+  #         pipx install uv
+  #         uv sync
 
-      - name: Build
-        run: |
-          .\.venv\Scripts\activate
+  #     - name: Build
+  #       run: |
+  #         .\.venv\Scripts\activate
 
-          cmake . -Bbuild
+  #         cmake . -Bbuild
 
-          cmake --build build --parallel --config Release
+  #         cmake --build build --parallel --config Release
 
-      - name: Test
-        working-directory: build
-        run: |
-          ctest --verbose -C Release
+  #     - name: Test
+  #       working-directory: build
+  #       run: |
+  #         ctest --verbose -C Release
 
-  build-emscripten:
-    runs-on: ubuntu-26.04
+  # build-emscripten:
+  #   runs-on: ubuntu-26.04
 
-    steps:
-      - uses: actions/checkout@v7
+  #   steps:
+  #     - uses: actions/checkout@v7
 
-      - name: Install emsdk
-        run: |
-          git clone --depth 1 http://github.com/emscripten-core/emsdk.git /opt/emsdk
-          /opt/emsdk/emsdk install 5.0.7
-          /opt/emsdk/emsdk activate 5.0.7
+  #     - name: Install emsdk
+  #       run: |
+  #         git clone --depth 1 http://github.com/emscripten-core/emsdk.git /opt/emsdk
+  #         /opt/emsdk/emsdk install 5.0.7
+  #         /opt/emsdk/emsdk activate 5.0.7
 
-      - name: Setup emscripten cache
-        uses: actions/cache@v6
-        with:
-          path: ~/.emscripten-cache
-          key: ${{ runner.os }}-emscripten-{{ hashFiles('/home/runner/.emscripten-cache/sanity.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-emscripten-
+  #     - name: Setup emscripten cache
+  #       uses: actions/cache@v6
+  #       with:
+  #         path: ~/.emscripten-cache
+  #         key: ${{ runner.os }}-emscripten-{{ hashFiles('/home/runner/.emscripten-cache/sanity.txt') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-emscripten-
 
-      - name: Install dependencies
-        run: |
-          npm ci
+  #     - name: Install dependencies
+  #       run: |
+  #         npm ci
 
-      - name: Download MLIR
-        run: |
-          npm run download-mlir
-        env:
-          GH_TOKEN: ${{ github.token }}
-        continue-on-error: true
+  #     - name: Download MLIR
+  #       run: |
+  #         npm run download-mlir
+  #       env:
+  #         GH_TOKEN: ${{ github.token }}
+  #       continue-on-error: true
 
-      - name: Prettier
-        run: |
-          npm -w cxx-frontend run prettier
+  #     - name: Prettier
+  #       run: |
+  #         npm -w cxx-frontend run prettier
 
-      - name: Build
-        run: |
-          source "/opt/emsdk/emsdk_env.sh"
-          export EMSCRIPTEN_ROOT="/opt/emsdk/upstream/emscripten"
-          npm run build:cxx-frontend
-          npm run build:playground-sysroot
-          npm -w cxx-frontend pack
+  #     - name: Build
+  #       run: |
+  #         source "/opt/emsdk/emsdk_env.sh"
+  #         export EMSCRIPTEN_ROOT="/opt/emsdk/upstream/emscripten"
+  #         npm run build:cxx-frontend
+  #         npm run build:playground-sysroot
+  #         npm -w cxx-frontend pack
 
-      - name: Build Docs
-        working-directory: packages/cxx-frontend
-        run: |
-          npm -w cxx-frontend run docs
+  #     - name: Build Docs
+  #       working-directory: packages/cxx-frontend
+  #       run: |
+  #         npm -w cxx-frontend run docs
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: cxx-frontend-dist
-          path: |
-            packages/cxx-frontend/dist/
-            packages/cxx-frontend/docs/
-          retention-days: 1
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v7
+  #       with:
+  #         name: cxx-frontend-dist
+  #         path: |
+  #           packages/cxx-frontend/dist/
+  #           packages/cxx-frontend/docs/
+  #         retention-days: 1
 
-      - name: Upload playground sysroot
-        uses: actions/upload-artifact@v7
-        with:
-          name: cxx-playground-sysroot
-          path: packages/cxx-playground/public/sysroot.zip
-          retention-days: 1
+  #     - name: Upload playground sysroot
+  #       uses: actions/upload-artifact@v7
+  #       with:
+  #         name: cxx-playground-sysroot
+  #         path: packages/cxx-playground/public/sysroot.zip
+  #         retention-days: 1
 
-  build-macos:
-    runs-on: macos-latest
-    if: false
+  # build-macos:
+  #   runs-on: macos-latest
+  #   if: false
 
-    steps:
-      - uses: actions/checkout@v7
+  #   steps:
+  #     - uses: actions/checkout@v7
 
-      - name: Install unit tests requirements
-        run: |
-          pipx install uv
-          uv sync
+  #     - name: Install unit tests requirements
+  #       run: |
+  #         pipx install uv
+  #         uv sync
 
-      - name: Build
-        run: |
-          . .venv/bin/activate
+  #     - name: Build
+  #       run: |
+  #         . .venv/bin/activate
 
-          cmake --preset default
+  #         cmake --preset default
 
-          cmake --build build --parallel
+  #         cmake --build build --parallel
 
-      - name: Test
-        working-directory: build
-        run: |
-          ctest --verbose
+  #     - name: Test
+  #       working-directory: build
+  #       run: |
+  #         ctest --verbose
 
-      - name: Parse C++ source files (macOS toolchain)
-        run: |
-          for i in src/parser/cxx/*.cc src/lsp/cxx/lsp/*.cc src/frontend/cxx/*.cc; do
-            echo "Parsing $i"
-            ./build/src/frontend/cxx \
-              -toolchain macos \
-              -I src/parser \
-              -I src/lsp \
-              -I build/_deps/utfcpp-src/source \
-              -I build/_deps/simdjson-src \
-              -I build/src/parser \
-              -DCXX_NO_FLATBUFFERS \
-              $i
-          done
+  #     - name: Parse C++ source files (macOS toolchain)
+  #       run: |
+  #         for i in src/parser/cxx/*.cc src/lsp/cxx/lsp/*.cc src/frontend/cxx/*.cc; do
+  #           echo "Parsing $i"
+  #           ./build/src/frontend/cxx \
+  #             -toolchain macos \
+  #             -I src/parser \
+  #             -I src/lsp \
+  #             -I build/_deps/utfcpp-src/source \
+  #             -I build/_deps/simdjson-src \
+  #             -I build/src/parser \
+  #             -DCXX_NO_FLATBUFFERS \
+  #             $i
+  #         done
 
-  build-wasi:
-    runs-on: ubuntu-26.04
+  # build-wasi:
+  #   runs-on: ubuntu-26.04
 
-    env:
-      WASMTIME_VERSION: 35.0.0
+  #   env:
+  #     WASMTIME_VERSION: 35.0.0
 
-    steps:
-      - uses: actions/checkout@v7
+  #   steps:
+  #     - uses: actions/checkout@v7
 
-      - name: Build
-        run: |
-          npm ci
-          npm run build:wasi
+  #     - name: Build
+  #       run: |
+  #         npm ci
+  #         npm run build:wasi
 
-      - name: Install wasmtime
-        run: |
-          wget -nd -P /tmp/ https://github.com/bytecodealliance/wasmtime/releases/download/v${{ env.WASMTIME_VERSION }}/wasmtime-v${{ env.WASMTIME_VERSION }}-$(uname -m)-linux.tar.xz
-          tar -C /usr/local/bin -xvf /tmp/wasmtime-v${{ env.WASMTIME_VERSION }}-$(uname -m)-linux.tar.xz --strip-components=1 --wildcards 'wasmtime-*-linux/wasmtime'
+  #     - name: Install wasmtime
+  #       run: |
+  #         wget -nd -P /tmp/ https://github.com/bytecodealliance/wasmtime/releases/download/v${{ env.WASMTIME_VERSION }}/wasmtime-v${{ env.WASMTIME_VERSION }}-$(uname -m)-linux.tar.xz
+  #         tar -C /usr/local/bin -xvf /tmp/wasmtime-v${{ env.WASMTIME_VERSION }}-$(uname -m)-linux.tar.xz --strip-components=1 --wildcards 'wasmtime-*-linux/wasmtime'
 
-      - name: Test
-        run: |
-          wasmtime \
-            -W threads=y -S threads=y \
-            --dir ${{github.workspace}}/build.wasi/install::/ \
-            --dir tests::tests \
-            ${{github.workspace}}/build.wasi/install/usr/bin/cxx.wasm -v tests/manual/source.cc
+  #     - name: Test
+  #       run: |
+  #         wasmtime \
+  #           -W threads=y -S threads=y \
+  #           --dir ${{github.workspace}}/build.wasi/install::/ \
+  #           --dir tests::tests \
+  #           ${{github.workspace}}/build.wasi/install/usr/bin/cxx.wasm -v tests/manual/source.cc
 
-      - name: Parse C++ source files (wasmtime runtime)
-        run: |
-          PATH=~/wasmtime-v${{ env.WASMTIME_VERSION }}-x86_64-linux:$PATH
+  #     - name: Parse C++ source files (wasmtime runtime)
+  #       run: |
+  #         PATH=~/wasmtime-v${{ env.WASMTIME_VERSION }}-x86_64-linux:$PATH
 
-          for i in src/parser/cxx/*.cc src/lsp/cxx/lsp/*.cc src/frontend/cxx/*.cc; do
-            echo "Parsing $i"
-            wasmtime \
-                  -W threads=y -S threads=y \
-                  --dir=src::/src \
-                  --dir=build.wasi/_deps::/build.wasi/_deps \
-                  --dir=build.wasi/src/parser::build.wasi/src/parser \
-                  --dir=build.wasi/src/lsp::build.wasi/src/lsp \
-                  --dir=build.wasi/install/usr::/usr \
-                  build.wasi/install/usr/bin/cxx.wasm \
-              -I src/parser \
-              -I src/lsp \
-              -I build.wasi/_deps/utfcpp-src/source \
-              -I build.wasi/_deps/simdjson-src \
-              -I build.wasi/src/parser \
-              -DCXX_NO_FLATBUFFERS \
-              -DCXX_NO_FILESYSTEM \
-              -DCXX_NO_THREADS \
-              -D_WASI_EMULATED_MMAN \
-              $i
-          done
+  #         for i in src/parser/cxx/*.cc src/lsp/cxx/lsp/*.cc src/frontend/cxx/*.cc; do
+  #           echo "Parsing $i"
+  #           wasmtime \
+  #                 -W threads=y -S threads=y \
+  #                 --dir=src::/src \
+  #                 --dir=build.wasi/_deps::/build.wasi/_deps \
+  #                 --dir=build.wasi/src/parser::build.wasi/src/parser \
+  #                 --dir=build.wasi/src/lsp::build.wasi/src/lsp \
+  #                 --dir=build.wasi/install/usr::/usr \
+  #                 build.wasi/install/usr/bin/cxx.wasm \
+  #             -I src/parser \
+  #             -I src/lsp \
+  #             -I build.wasi/_deps/utfcpp-src/source \
+  #             -I build.wasi/_deps/simdjson-src \
+  #             -I build.wasi/src/parser \
+  #             -DCXX_NO_FLATBUFFERS \
+  #             -DCXX_NO_FILESYSTEM \
+  #             -DCXX_NO_THREADS \
+  #             -D_WASI_EMULATED_MMAN \
+  #             $i
+  #         done
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: cxx-wasi
-          path: |
-            build.wasi/install/usr/bin
-            build.wasi/install/usr/lib/cxx
-            build.wasi/install/usr/lib/wasi-sysroot/include/c++
-            build.wasi/install/usr/lib/wasi-sysroot/include/wasm32-wasip1
-          retention-days: 1
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v7
+  #       with:
+  #         name: cxx-wasi
+  #         path: |
+  #           build.wasi/install/usr/bin
+  #           build.wasi/install/usr/lib/cxx
+  #           build.wasi/install/usr/lib/wasi-sysroot/include/c++
+  #           build.wasi/install/usr/lib/wasi-sysroot/include/wasm32-wasip1
+  #         retention-days: 1
 
-  build-playground:
-    runs-on: ubuntu-26.04
-    needs: build-emscripten
-    steps:
-      - uses: actions/checkout@v7
+  # build-playground:
+  #   runs-on: ubuntu-26.04
+  #   needs: build-emscripten
+  #   steps:
+  #     - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v8
-        with:
-          name: cxx-frontend-dist
-          path: packages/cxx-frontend
+  #     - uses: actions/download-artifact@v8
+  #       with:
+  #         name: cxx-frontend-dist
+  #         path: packages/cxx-frontend
 
-      - uses: actions/download-artifact@v8
-        with:
-          name: cxx-playground-sysroot
-          path: packages/cxx-playground/public
+  #     - uses: actions/download-artifact@v8
+  #       with:
+  #         name: cxx-playground-sysroot
+  #         path: packages/cxx-playground/public
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v6
+  #     - name: Configure GitHub Pages
+  #       uses: actions/configure-pages@v6
 
-      - name: Build
-        run: |
-          npm ci
-          npm run build -w @robertoraggi/cxx-playground -- --base /cplusplus/
-          mkdir -p packages/cxx-playground/dist/docs
-          cp -a packages/cxx-frontend/docs/. packages/cxx-playground/dist/docs
+  #     - name: Build
+  #       run: |
+  #         npm ci
+  #         npm run build -w @robertoraggi/cxx-playground -- --base /cplusplus/
+  #         mkdir -p packages/cxx-playground/dist/docs
+  #         cp -a packages/cxx-frontend/docs/. packages/cxx-playground/dist/docs
 
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: packages/cxx-playground/dist
+  #     - name: Upload GitHub Pages artifact
+  #       uses: actions/upload-pages-artifact@v5
+  #       with:
+  #         path: packages/cxx-playground/dist
 
-  deploy-playground:
-    name: Deploy Playground
-    if: github.repository == 'robertoraggi/cplusplus' && github.ref == 'refs/heads/main'
+  # deploy-playground:
+  #   name: Deploy Playground
+  #   if: github.repository == 'robertoraggi/cplusplus' && github.ref == 'refs/heads/main'
 
-    needs: build-playground
+  #   needs: build-playground
 
-    permissions:
-      pages: write
-      id-token: write
+  #   permissions:
+  #     pages: write
+  #     id-token: write
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
 
-    runs-on: ubuntu-26.04
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+  #   runs-on: ubuntu-26.04
+  #   steps:
+  #     - name: Deploy to GitHub Pages
+  #       id: deployment
+  #       uses: actions/deploy-pages@v5
